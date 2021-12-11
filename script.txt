@@ -1,0 +1,1 @@
+npx sequelize-auto -o "./src/db/models" -d covid_db -h localhost -u postgres -p 5432 -x Password123 -e postgres
