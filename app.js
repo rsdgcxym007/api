@@ -4,10 +4,29 @@ const app = express()
 const port = 4000
 const jwt = require('./src/middlewares/jwt')
 const moment = require('moment')
+const multer = require('multer')
+var fs = require('fs');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/')
+  },
+  filename: (req, file, cb) => {
+    cb(null, 'file-' + Date.now() + '.' +
+      file.originalname.split('.')[file.originalname.split('.').length - 1])
+  }
+})
+
+const upload = multer({
+  storage: storage
+})
 
 const {
   PrismaClient
 } = require('@prisma/client')
+const {
+  query,
+  text
+} = require('express')
 
 
 
@@ -17,6 +36,24 @@ app.use(express.urlencoded({
   extended: false
 }))
 app.use(express.json())
+
+app.get('/image/:name', async (req, res) => {
+  const {
+    name
+  } = req.params
+  res.writeHead(200, {
+    'content-type': 'image/jpg'
+  });
+  fs.createReadStream(`uploads/${name}`).pipe(res);
+})
+
+app.post('/api/upload', upload.single('file'), async (req, res) => {
+
+  console.log(req.file)
+  return res.json({
+    data: 123
+  })
+})
 
 app.get('/', async (req, res) => {
   const result = await prisma.types.findMany();
@@ -39,10 +76,7 @@ app.post('/api/auth/login', async (req, res) => {
 
   let errorFlag = false
   let message = 'fail'
-  if (email.length < 8 || password.length < 8) {
-    errorFlag = true
-    message = 'username or password less than 8 digits'
-  }
+
 
   const data = await prisma.users.findFirst({
     where: {
@@ -240,6 +274,7 @@ app.post('/api/manage/request', async (req, res) => {
     data
   })
 
+
   if (!task) {
     return res.json({
       result: false,
@@ -252,6 +287,7 @@ app.post('/api/manage/request', async (req, res) => {
     message: "request success"
   })
 })
+
 
 
 
@@ -288,7 +324,11 @@ app.post('/api/manage/taskall', async (req, res) => {
     {
       text: 'วันที่สร้าง',
       value: 'created_at'
-    },
+    }
+    // {
+    //   text: 'ช่วยเหลือ',
+    //   value: 'help'
+    // },
   ];
   return res.json({
     result: results,

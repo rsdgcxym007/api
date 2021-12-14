@@ -55,3 +55,14 @@ model users {
   updated_at DateTime @default(now()) @db.Timestamptz(6)
   group_id   Int?
 }
+
+model uploadimage {
+  id            Int      @id(map: "uploadimage_pk") @default(autoincrement())
+  user_id       Int
+  day_of_visit  String?  @db.VarChar(255)
+  hospital      String?  @db.VarChar(255)
+  image_rtpcr   String?  @db.VarChar(255)
+  image_medical String?  @db.VarChar(255)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+}
